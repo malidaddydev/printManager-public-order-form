@@ -16,10 +16,8 @@
 
 <script type="text/babel">
 const { useState, useEffect, useRef } = React;
-const { useHistory } = ReactRouterDOM;
 
 function CreateOrder() {
-  const history = useHistory();
   const [orderData, setOrderData] = useState({
     lastName: '',
     firstName: '',
@@ -325,7 +323,6 @@ function CreateOrder() {
       setServiceDropdowns({});
       setFileInputs([0]);
       fileInputRefs.current.forEach(ref => ref && (ref.value = ''));
-      setTimeout(() => history.push('/dashboard/order/list'), 2000);
     } catch (err) {
       setMessage('Error creating order: ' + (err.message || 'Unknown error'));
     } finally {
@@ -339,11 +336,28 @@ function CreateOrder() {
     products: products.filter(product => product.serviceId === service.id)
   }));
 
+  const [orgData, setOrgData] = useState({ logo: null, name: null });
+
+  useEffect(() => {
+    // Fetch organization settings
+    fetch('https://printmanager-api.onrender.com/api/organization-settings')
+      .then(response => response.json())
+      .then(data => {
+        setOrgData({
+          logo: data.logo,
+          name: data.name,
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching organization data:', error);
+      });
+  }, []);
+
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 md:gap-7 w-full justify-center items-center my-[50px]">
-        <div className="text-center">
-            <h1 className="text-[28px] sm:text-[58px] font-bold">Soccer Express</h1>
-            <h1 className="text-[28px] sm:text-[38px] font-bold">Public Order Create Form</h1>
+    <div className="flex flex-col gap-4 sm:gap-6 md:gap-7 w-full justify-center items-center my-[50px] px-[20px]">
+        <div className="flex flex-col justify-center items-center">
+            <img src={`https://printmanager-api.onrender.com${orgData.logo}`} alt={orgData.name} className="w-[200px] sm:w-[350px]" />
+            <h1 className="text-[28px] sm:text-[38px] font-bold text-center">Public Order Create Form</h1>
         </div>
       {message && (
         <div className={`p-4 rounded-lg text-sm ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
