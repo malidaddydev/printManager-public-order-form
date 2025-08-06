@@ -22,18 +22,18 @@ function CreateOrder() {
     lastName: '',
     firstName: '',
     company: '',
-    mobile: '',
+    mobile: '',    
     mobile2: '',
     address: '',
     email: '',
     title: '',
-    status: 'Draft',
+    status: 'draft',
     startDate: new Date().toISOString().split('T')[0],
     dueDate: '',
     notes: '',
     items: [],
     files: [],
-    createdBy: ''
+    createdBy: 'Public User'
   });
   const [products, setProducts] = useState([]);
   const [services, setServices] = useState([]);
@@ -43,6 +43,15 @@ function CreateOrder() {
   const fileInputRefs = useRef([]);
   const [fileInputs, setFileInputs] = useState([0]);
   const [isItemCollapsed, setIsItemCollapsed] = useState({});
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage('');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   // Fetch products and services
   useEffect(() => {
@@ -70,12 +79,6 @@ function CreateOrder() {
   const handleFileChange = (e, index) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      for (let file of files) {
-        if (file.size > 5 * 1024 * 1024) {
-          setMessage('File size must be less than 5MB');
-          return;
-        }
-      }
       setOrderData(prev => {
         const newFiles = [...prev.files];
         newFiles[index] = files[0];
@@ -268,8 +271,7 @@ function CreateOrder() {
     formData.append('address', orderData.address);
     formData.append('email', orderData.email);
     formData.append('title', orderData.title);
-    formData.append('status', orderData.status);
-    formData.append('createdBy', sessionStorage.getItem('username'));
+    formData.append('createdBy', 'Public User');
     if (orderData.startDate) {
       formData.append('startDate', new Date(orderData.startDate).toISOString());
     }
@@ -312,7 +314,7 @@ function CreateOrder() {
         address: '',
         email: '',
         title: '',
-        status: 'Draft',
+        status: 'draft',
         startDate: new Date().toISOString().split('T')[0],
         dueDate: '',
         notes: '',
@@ -353,17 +355,14 @@ function CreateOrder() {
       });
   }, []);
 
+  const today = new Date().toISOString().split('T')[0];
+
   return (
     <div className="flex flex-col gap-4 sm:gap-6 md:gap-7 w-full justify-center items-center my-[50px] px-[20px]">
         <div className="flex flex-col justify-center items-center">
             <img src={`https://printmanager-api.onrender.com${orgData.logo}`} alt={orgData.name} className="w-[200px] sm:w-[350px]" />
             <h1 className="text-[28px] sm:text-[38px] font-bold text-center">Public Create Order Form</h1>
         </div>
-      {message && (
-        <div className={`p-4 rounded-lg text-sm ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-          {message}
-        </div>
-      )}
       <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg border border-gray-200 w-full sm:w-[50%]">
         <h3 className="mb-4 text-[18px] sm:text-[28px] font-bold">Customer Information</h3>
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
@@ -477,37 +476,24 @@ function CreateOrder() {
             />
           </div>
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-900">Status</label>
-            <select
-              name="status"
-              value={orderData.status}
-              onChange={handleChange}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-xs sm:text-sm"
-            >
-              <option value="draft">Draft</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="in progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-          <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-900">Start Date</label>
             <input
               type="date"
               name="startDate"
+              min={today}
               value={orderData.startDate}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-xs sm:text-sm"
             />
           </div>
-          <div>
+          <div className="md:col-span-2">
             <label className="block text-xs sm:text-sm font-medium text-gray-900 after:content-['*'] after:text-red-500">
               Due Date
             </label>
             <input
               type="date"
               name="dueDate"
+              min={today}
               value={orderData.dueDate}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-xs sm:text-sm"
@@ -771,6 +757,12 @@ function CreateOrder() {
             Add Item
           </button>
         </div>
+
+        {message && (
+          <div className={`p-4 mt-4 rounded-lg text-sm ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+            {message}
+          </div>
+        )}
 
         <div className="mt-4 sm:mt-6 w-full flex justify-end">
           <button
