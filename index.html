@@ -303,7 +303,7 @@ function CreateOrder() {
     }
 
     try {
-      const response = await axios.post('https://printmanager-api.onrender.com/api/orders', formData);
+      const response = await axios.post('https://printmanager-api.onrender.com/api/customer-order', formData);
       setMessage('Order created successfully');
       setOrderData({
         lastName: '',
