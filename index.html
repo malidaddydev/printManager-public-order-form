@@ -197,7 +197,7 @@ function CreateOrder() {
             productTitle: product.title || '',
             serviceTitle: services.find(s => s.id === product.serviceId)?.title || '',
             image: product.files?.[0]?.filePath
-              ? `https://printmanager-api.onrender.com${product.files[0].filePath}`
+              ? `${product.files[0].filePath}`
               : '',
             colorOptions: product.colorOptions || [],
             sizeOptions: product.sizeOptions || [],
@@ -360,7 +360,7 @@ function CreateOrder() {
   return (
     <div className="flex flex-col gap-4 sm:gap-6 md:gap-7 w-full justify-center items-center my-[50px] px-[20px]">
         <div className="flex flex-col justify-center items-center">
-            <img src={`https://printmanager-api.onrender.com${orgData.logo}`} alt={orgData.name} className="w-[200px] sm:w-[350px]" />
+            <img src={orgData.logo} alt={orgData.name} className="w-[200px] sm:w-[350px]" />
             <h1 className="text-[28px] sm:text-[38px] font-bold text-center">Public Create Order Form</h1>
         </div>
       <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg border border-gray-200 w-full sm:w-[50%]">
