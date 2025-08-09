@@ -47,6 +47,7 @@ function CreateOrder() {
   const [isVerified, setIsVerified] = useState(false);
   const [totalQuantity, setTotalQuantity] = useState(0);
 
+  // Clear message after 2 seconds
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => {
@@ -57,7 +58,7 @@ function CreateOrder() {
   }, [message]);
 
   // Cloudflare Turnstile callback
-  const handleTurnstileVerify = (token) => {
+  window.handleTurnstileVerify = (token) => {
     if (token) {
       setIsVerified(true);
       setMessage('Verification successful');
@@ -261,7 +262,7 @@ function CreateOrder() {
       const itemTotal = item.sizeQuantities.reduce((sum, size) => {
         return sum + (size.Price * size.Quantity);
       }, 0);
-      const itemQuantity = item.sizeQuantities.reduce((sum, size) => sum + size.Quantity, 0);
+      const itemQuantity = item.sizeQuantities.reduce((sum, size) => sum + (parseInt(size.Quantity) || 0), 0);
       return { 
         ...item, 
         total: itemTotal, 
@@ -280,8 +281,8 @@ function CreateOrder() {
       setMessage('Please fill in all required fields');
       return;
     }
-    if (totalQuantity !== 12) {
-      setMessage('Order requires exactly 12 items to proceed');
+    if (totalQuantity < 12) {
+      setMessage('Order requires at least 12 items to proceed');
       return;
     }
     if (!isVerified) {
@@ -355,7 +356,9 @@ function CreateOrder() {
       setFileInputs([0]);
       fileInputRefs.current.forEach(ref => ref && (ref.value = ''));
       setIsVerified(false);
-      window.turnstile.reset();
+      if (window.turnstile) {
+        window.turnstile.reset();
+      }
     } catch (err) {
       setMessage('Error creating order: ' + (err.message || 'Unknown error'));
     } finally {
@@ -844,7 +847,7 @@ function CreateOrder() {
           </button>
         </div>
         <div className="mt-2 text-xs sm:text-sm text-gray-600">
-          Total Quantity: {totalQuantity} {totalQuantity !== 12 ? '(Order requires exactly 12 items)' : ''}
+          Total Quantity: {totalQuantity} {totalQuantity < 12 ? '(Order requires at least 12 items)' : ''}
         </div>
       </div>
     </div>
